@@ -4,7 +4,7 @@
 #  Created by Arun Natarajan on 12/31/12.
 #  This script will automate the drupal update process and support restoring an old data version of drupal, if the backup files exist.
 #  Dont be panic, please modify the variables section of this script to match with your setup.
-#
+#  Use this script at your own risk :)
 
 # Please modify these variables to match with your setup
 BACKUP_PATH=/home/foo/backups
