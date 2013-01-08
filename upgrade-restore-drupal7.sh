@@ -5,6 +5,7 @@
 #  This script will automate the drupal update process and support restoring an old data version of drupal, if the backup files exist.
 #  Dont be panic, please modify the variables section of this script to match with your setup.
 #  Use this script at your own risk :)
+#  This script assumes that you dont have any other product installed on the document root, otherwise it may affect the restore process.
 
 # Please modify these variables to match with your setup
 BACKUP_PATH=/home/foo/backups
@@ -49,7 +50,8 @@ case $choice in
   fi
 
   # Make a backup of current website
-  cp -prf $DRUPAL_PATH $BACKUP_PATH/$time
+  mkdir -p $BACKUP_PATH/$time
+  cp -prf $DRUPAL_PATH/* $BACKUP_PATH/$time/
   echo "Current site backup is created: $BACKUP_PATH/$time"
 
   # Database backup
@@ -57,7 +59,7 @@ case $choice in
   echo "Database backup created: $BACKUP_PATH/$MYSQL_DATABASE_$time.sql"
 
   # Push the site to maintance mode
-  $MYSQL_PATH -u $MYSQL_USER --password="$MYSQL_PASSWORD" $MYSQL_DATABASE -e "UPDATE variable SET value='s:1:"1"' WHERE name = 'site_offline'"
+  $MYSQL_PATH -u $MYSQL_USER --password="$MYSQL_PASSWORD" $MYSQL_DATABASE -e "UPDATE variable SET value='s:1:\"1\"' WHERE name = 'site_offline'"
   echo "Site is in maintanence mode now"
 
   # Update drupal
@@ -72,7 +74,7 @@ case $choice in
   echo "Copied the new version contents"
 
   # Site back active
-  $MYSQL_PATH -u $MYSQL_USER --password="$MYSQL_PASSWORD" $MYSQL_DATABASE -e "UPDATE variable SET value='s:1:"0"' WHERE name = 'site_offline'"
+  $MYSQL_PATH -u $MYSQL_USER --password="$MYSQL_PASSWORD" $MYSQL_DATABASE -e "UPDATE variable SET value='s:1:\"0\"' WHERE name = 'site_offline'"
   echo "Drupal upgraded to $drupal_version"
   echo "Site is active again, but please update your database, please visit http://<yourwebsite>/update.php to finalize the process"
 
@@ -90,9 +92,9 @@ case $choice in
   read RESTORE_FILE
 
   # Push the site to maintance mode
-  $MYSQL_PATH -u $MYSQL_USER --password="$MYSQL_PASSWORD" $MYSQL_DATABASE -e "UPDATE variable SET value='s:1:"1"' WHERE name = 'site_offline'"
+  $MYSQL_PATH -u $MYSQL_USER --password="$MYSQL_PASSWORD" $MYSQL_DATABASE -e "UPDATE variable SET value='s:1:\"1\"' WHERE name = 'site_offline'"
   echo "Site is offline now"
-  rm -rf $DRUPAL_PATH/*
+  rm -rf $DRUPAL_PATH/$CORE_FILES
   echo "Removed production files"
   cp -R $BACKUP_PATH/$RESTORE_FILE/* $DRUPAL_PATH/
   echo "Restored the filesystem backup $backup_file"
@@ -102,13 +104,13 @@ case $choice in
   echo "Restored the database"
 
   # Site back active
-  $MYSQL_PATH -u $MYSQL_USER --password="$MYSQL_PASSWORD" $MYSQL_DATABASE -e "UPDATE variable SET value='s:1:"0"' WHERE name = 'site_offline'"
+  $MYSQL_PATH -u $MYSQL_USER --password="$MYSQL_PASSWORD" $MYSQL_DATABASE -e "UPDATE variable SET value='s:1:\"0\"' WHERE name = 'site_offline'"
   echo "Site is restored"
 ;;
 
 # 3. Exit
  3)
-  echo "noting done"
+  echo "nothing done"
   exit 0
 ;;
 
